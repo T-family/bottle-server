@@ -4,6 +4,7 @@ from flask import Flask, render_template
 from flask_socketio import SocketIO , send , Namespace ,join_room, leave_room
 from users import *
 from threading import Timer
+import copy 
 
 import json
 
@@ -62,14 +63,20 @@ def add_user_to_room(data):
     join_room(data["room"])
     print("{0} has joined the room".format(data["username"]))
     send(data["username"] + ' has entered the room.',room= data["room"])
-    tempChoosenRoom = choosenRoom
-    tempChoosenRoom.talkerThread=''
-    if len(tempChoosenRoom.queue) > 0:
-        for queueItem in tempChoosenRoom.queue:
-            queueItem = json.dumps(queueItem.__dict__)
 
-    print(choosenRoom.queue)
+    
+    tempChoosenRoom = Room(choosenRoom.name)
+    tempChoosenRoom.talkerThread=''
+    if len(choosenRoom.queue) > 0:
+        for i in range(len(choosenRoom.queue)):
+            tempChoosenRoom.queue.append(choosenRoom.queue[i])
+            # json.dumps(tempChoosenRoom.queue[i].__dict__)
+        for j in range(len(tempChoosenRoom.queue)):
+            tempChoosenRoom.queue[j] = json.dumps(tempChoosenRoom.queue[j].__dict__)
+
+    tempChoosenRoom.Last_ID_value = choosenRoom.Last_ID_value   
     print(tempChoosenRoom.queue)
+    print(tempChoosenRoom)
     message = {
         "AssignedID": AssignedID,
         "Room" : json.dumps(tempChoosenRoom.__dict__),

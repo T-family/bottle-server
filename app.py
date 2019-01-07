@@ -75,8 +75,8 @@ def add_user_to_room(data):
             tempChoosenRoom.queue[j] = json.dumps(tempChoosenRoom.queue[j].__dict__)
 
     tempChoosenRoom.Last_ID_value = choosenRoom.Last_ID_value   
-    print(tempChoosenRoom.queue)
-    print(tempChoosenRoom)
+    tempChoosenRoom.userID_map_Username = choosenRoom.userID_map_Username
+    tempChoosenRoom.talker = choosenRoom.talker
     message = {
         "AssignedID": AssignedID,
         "Room" : json.dumps(tempChoosenRoom.__dict__),
@@ -98,7 +98,7 @@ def nextUser(roomName):
     room = Rooms[roomName]
     message = {
         "type": "userStoppedSpeaking",
-        "userName": room.talker,
+        "username": room.talker,
     }
     with app.test_request_context('/'):
         socketio.send(message, room=roomName)

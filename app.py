@@ -66,7 +66,7 @@ def add_user_to_room(data):
     tempChoosenRoom.talkerThread=''
     if len(tempChoosenRoom.queue) > 0:
         for queueItem in tempChoosenRoom.queue:
-            queueItem = json.dumps(queueItem)
+            queueItem = json.dumps(queueItem.__dict__)
 
     print(choosenRoom.queue)
     print(tempChoosenRoom.queue)

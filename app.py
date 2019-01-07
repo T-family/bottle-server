@@ -1,4 +1,5 @@
-
+import eventlet
+eventlet.monkey_patch()
 from flask import Flask, render_template
 from flask_socketio import SocketIO , send , Namespace ,join_room, leave_room
 from users import *
@@ -41,6 +42,7 @@ def handle_message(message):
 def create_room(data):
     newRoom = Room(data["room"])
     newUser = User(data["username"])
+    newUser.avatar = data['avatar']
     Rooms[newRoom.name] = newRoom
     #addUser assigns a new id for the user and maps it to the name and returns the assigned id back to the user to use
     AssignedID = newRoom.addUser(newUser)
@@ -54,12 +56,16 @@ def create_room(data):
 def add_user_to_room(data):
     choosenRoom = Rooms[data["room"]]
     userObject = User(data["username"])
+    userObject.avatar = data['avatar']
+
     AssignedID = choosenRoom.addUser(userObject)
     join_room(data["room"])
     print("{0} has joined the room".format(data["username"]))
     send(data["username"] + ' has entered the room.',room= data["room"])
     tempChoosenRoom = choosenRoom
     tempChoosenRoom.talkerThread=''
+    print(choosenRoom.queue)
+    print(tempChoosenRoom.queue)
     message = {
         "AssignedID": AssignedID,
         "Room" : json.dumps(tempChoosenRoom.__dict__),
@@ -91,6 +97,7 @@ def nextUser(roomName):
     if len(room.queue)>0:
         UserToTalk = room.queue[0].name
         userToTalkID = room.queue[0].id
+        userToTalkAvatar = room.queue[0].avatar
         del room.queue[0]
         room.talker = UserToTalk
         queueTimer = Timer(10 , nextUser,{roomName : roomName})
@@ -100,7 +107,8 @@ def nextUser(roomName):
         message = {
             "type": "userStartedSpeaking",
             "userID": userToTalkID,
-            "username": UserToTalk
+            "username": UserToTalk,
+            "avatar" :userToTalkAvatar,
         }
         socketio.send(message,room= roomName)
         room.talkerThread = queueTimer
@@ -123,18 +131,21 @@ def JoinQueue(data):
         message = {
             "type": "userStartedSpeaking",
             "userID": data["userID"],
-            "username":data["username"]
+            "username":data["username"],
+            "avatar" : data['avatar']
         }
         send(message,room=data["room"])
         room.talkerThread = queueTimer
     else:
         userObject = User(data["username"])
         userObject.setID(data["userID"])
+        userObject.avatar = data['avatar']
         room.queue.append(userObject)
         message = {
             "type": "userJoinsQueue",
             "userID": userObject.id,
-            "username":userObject.name
+            "username":userObject.name,
+	    "avatar":userObject.avatar,
         }
         send(message, room=data["room"])
         print("{0} is added to queue".format(data["username"]))

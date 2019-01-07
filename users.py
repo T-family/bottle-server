@@ -19,10 +19,12 @@ class Room:
   
 
 class User:
-    def __init__(self , name ):
+    def __init__(self , name):
         self.name = name
+        self.avatar = ''
         self.id = ''
 
     def setID(self,id):
         self.id = id
+
 

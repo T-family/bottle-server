@@ -64,6 +64,10 @@ def add_user_to_room(data):
     send(data["username"] + ' has entered the room.',room= data["room"])
     tempChoosenRoom = choosenRoom
     tempChoosenRoom.talkerThread=''
+    if len(tempChoosenRoom.queeu) > 0:
+        for queueItem in tempChoosenRoom.queue:
+            queueItem = json.dumps(queueItem)
+
     print(choosenRoom.queue)
     print(tempChoosenRoom.queue)
     message = {
@@ -145,7 +149,7 @@ def JoinQueue(data):
             "type": "userJoinsQueue",
             "userID": userObject.id,
             "username":userObject.name,
-	    "avatar":userObject.avatar,
+	        "avatar":userObject.avatar,
         }
         send(message, room=data["room"])
         print("{0} is added to queue".format(data["username"]))
